@@ -1,64 +1,70 @@
 import pathlib
 import subprocess
-import tempfile
-
 import ffmpeg
 import streamlit as st
 import whisper
+import tempfile
 
+# Load the Whisper model
 model = whisper.load_model("base")
 
 @st.experimental_memo
 def convert_mp4_to_wav_ffmpeg_bytes2bytes(input_data: bytes) -> bytes:
     """
-    It converts mp4 to wav using ffmpeg
-    :param input_data: bytes object of a mp4 file
-    :return: A bytes object of a wav file.
+    Converts MP4 to WAV using FFmpeg.
+    :param input_data: bytes object of an MP4 file
+    :return: A bytes object of a WAV file.
     """
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_wav:
-        args = (
-            ffmpeg
+    # Create FFmpeg command for conversion
+    args = (ffmpeg
             .input('pipe:', format='mp4')
-            .output(name.wav, format='wav', codec='pcm_s16le', ac=1, ar=16000)
+            .output('pipe:', format='wav', acodec='pcm_s16le', ar='16000')
             .global_args('-loglevel', 'error')
-            .get_args()
-        )
-        proc = subprocess.Popen(
-            ['ffmpeg'] + args, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        proc.communicate(input=input_data)
-        with open(name.wav, "rb") as wav_data:
-            return wav_data.read()
+            .compile()
+            )
+    # Execute FFmpeg command
+    proc = subprocess.Popen(['ffmpeg'] + args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output, error = proc.communicate(input=input_data)
+    if proc.returncode != 0:
+        raise Exception(f"FFmpeg error: {error}")
+    return output
 
-@st.experimental_memo
-def on_file_change(uploaded_mp4_file):
-    return convert_mp4_to_wav_ffmpeg_bytes2bytes(uploaded_mp4_file.getvalue())
-
-def on_change_callback():
+def on_file_change(uploaded_file):
     """
-    It prints a message to the console. Just for testing of callbacks.
+    Handles file upload changes by converting the uploaded MP4 file to WAV format.
+    :param uploaded_file: Uploaded file object
+    :return: WAV file as bytes
     """
-    print(f'on_change_callback: {uploaded_mp4_file}')
+    try:
+        return convert_mp4_to_wav_ffmpeg_bytes2bytes(uploaded_file.getvalue())
+    except Exception as e:
+        st.error(f"Error converting file: {e}")
+        return None
 
-# The below code is a simple streamlit web app that allows you to upload an mp4 file
-# and then download the converted wav file.
 if __name__ == '__main__':
-    st.title('mp4 to WAV Converter test app')
-    st.markdown("""This is a quick example app for using **ffmpeg** on Streamlit Cloud.
-    It uses the `ffmpeg` binary and the python wrapper `ffmpeg-python` library.""")
+    st.title('MP4 to WAV Converter & Transcriber')
+    st.markdown("""This app converts an MP4 file to WAV format, transcribes it using Whisper, and displays the transcription.""")
 
-    uploaded_mp4_file = st.file_uploader('Upload Your mp4 File', type=['mp4'], on_change=on_change_callback)
+    uploaded_mp4_file = st.file_uploader('Upload Your MP4 File', type=['mp4'])
 
     if uploaded_mp4_file:
-        uploaded_mp4_file_length = len(uploaded_mp4_file.getvalue())
         filename = pathlib.Path(uploaded_mp4_file.name).stem
-        if uploaded_mp4_file_length > 0:
-            st.text(f'Size of uploaded "{uploaded_mp4_file.name}" file: {uploaded_mp4_file_length} bytes')
-            wav_data = on_file_change(uploaded_mp4_file)
-
-            st.markdown("""---""")
-            if wav_data:
-                transcription = model.transcribe(name.wav)
+        try:
+            converted_wav = on_file_change(uploaded_mp4_file)
+            if converted_wav:
+                # Lưu dữ liệu WAV vào một file tạm thời
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as tmpfile:
+                    tmpfile.write(converted_wav)
+                    tmpfile_path = tmpfile.name
+                
+                # Sử dụng file tạm thời với Whisper để transcribe
+                transcription = model.transcribe(tmpfile_path)
+                
                 st.sidebar.success("Transcription Complete")
                 st.markdown(transcription["text"])
-        
-            st.markdown("""---""")
+                
+                # Xóa file tạm thời sau khi đã sử dụng
+                pathlib.Path(tmpfile_path).unlink()
+                
+        except Exception as e:
+            st.error(f"An error occurred during file processing: {e}")
