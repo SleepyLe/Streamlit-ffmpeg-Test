@@ -10,24 +10,22 @@ model = whisper.load_model("base")
 
 @st.experimental_memo
 def convert_mp4_to_wav_ffmpeg_bytes2bytes(input_data: bytes) -> bytes:
+   """
+    It converts mp3 to wav using ffmpeg
+    :param input_data: bytes object of a mp3 file
+    :return: A bytes object of a wav file.
     """
-    Converts MP4 to WAV using FFmpeg.
-    :param input_data: bytes object of an MP4 file
-    :return: A bytes object of a WAV file.
-    """
-    # Create FFmpeg command for conversion
+    # print('convert_mp3_to_wav_ffmpeg_bytes2bytes')
     args = (ffmpeg
-            .input('pipe:', format='mp4')
-            .output('pipe:', format='wav', acodec='pcm_s16le', ar='16000')
+            .input('pipe:', format='mp3')
+            .output('pipe:', format='wav')
             .global_args('-loglevel', 'error')
-            .compile()
+            .get_args()
             )
-    # Execute FFmpeg command
-    proc = subprocess.Popen(['ffmpeg'] + args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    output, error = proc.communicate(input=input_data)
-    if proc.returncode != 0:
-        raise Exception(f"FFmpeg error: {error}")
-    return output
+    # print(args)
+    proc = subprocess.Popen(
+        ['ffmpeg'] + args, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    return proc.communicate(input=input_data)[0]
 
 def on_file_change(uploaded_file):
     """
