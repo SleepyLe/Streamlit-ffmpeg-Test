@@ -19,14 +19,14 @@ def convert_mp4_to_wav_ffmpeg_bytes2bytes(input_data: bytes) -> bytes:
         args = (
             ffmpeg
             .input('pipe:', format='mp4')
-            .output(temp_wav.name, format='wav', codec='pcm_s16le', ac=1, ar=16000)
+            .output(name.wav, format='wav', codec='pcm_s16le', ac=1, ar=16000)
             .global_args('-loglevel', 'error')
             .get_args()
         )
         proc = subprocess.Popen(
             ['ffmpeg'] + args, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         proc.communicate(input=input_data)
-        with open(temp_wav.name, "rb") as wav_data:
+        with open(name.wav, "rb") as wav_data:
             return wav_data.read()
 
 @st.experimental_memo
@@ -57,7 +57,7 @@ if __name__ == '__main__':
 
             st.markdown("""---""")
             if wav_data:
-                transcription = model.transcribe(wav_data)
+                transcription = model.transcribe(name.wav)
                 st.sidebar.success("Transcription Complete")
                 st.markdown(transcription["text"])
         
