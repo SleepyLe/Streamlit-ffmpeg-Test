@@ -17,7 +17,7 @@ def convert_mp4_to_wav_ffmpeg_bytes2bytes(input_data: bytes) -> bytes:
     """
     # print('convert_mp3_to_wav_ffmpeg_bytes2bytes')
     args = (ffmpeg
-            .input('pipe:', format='mp3')
+            .input('pipe:', format='mp4')
             .output('pipe:', format='wav')
             .global_args('-loglevel', 'error')
             .get_args()
