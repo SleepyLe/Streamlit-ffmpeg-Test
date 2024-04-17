@@ -55,10 +55,10 @@ if __name__ == '__main__':
             st.text(f'Size of uploaded "{uploaded_mp4_file.name}" file: {uploaded_mp4_file_length} bytes')
             wav_data = on_file_change(uploaded_mp4_file)
 
-    st.markdown("""---""")
-    if wav_data:
-        transcription = model.transcribe(wav_data)
-        st.sidebar.success("Transcription Complete")
-        st.markdown(transcription["text"])
-
-    st.markdown("""---""")
+            st.markdown("""---""")
+            if wav_data:
+                transcription = model.transcribe(wav_data)
+                st.sidebar.success("Transcription Complete")
+                st.markdown(transcription["text"])
+        
+            st.markdown("""---""")
