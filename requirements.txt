@@ -2,5 +2,4 @@ numpy
 pandas
 ffmpeg-python
 streamlit
-pytorch torchvision torchaudio pytorch-cuda==11.7 -c pytorch -c nvidia
 git+https://github.com/openai/whisper.git -q
