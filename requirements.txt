@@ -3,3 +3,4 @@ pandas
 ffmpeg-python
 streamlit
 git+https://github.com/openai/whisper.git
+torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
