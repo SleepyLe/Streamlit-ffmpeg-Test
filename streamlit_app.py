@@ -65,8 +65,8 @@ if __name__ == '__main__':
     if downloadfile:
         length = len(downloadfile)
         if length > 0:
-            st.text(downloadfile.name)
-            transcription = model.transcribe(downloadfile.name)
+            # st.text(downloadfile.name)
+            transcription = model.transcribe(downloadfile)
             st.sidebar.success("Transcription Complete")
             st.markdown(transcription["text"])
             # st.subheader('After conversion to WAV you can download it below')
