@@ -65,6 +65,7 @@ if __name__ == '__main__':
     if downloadfile:
         length = len(downloadfile)
         if length > 0:
+            st.text(downloadfile.name)
             transcription = model.transcribe(downloadfile.name)
             st.sidebar.success("Transcription Complete")
             st.markdown(transcription["text"])
