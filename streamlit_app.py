@@ -3,7 +3,9 @@ import subprocess
 
 import ffmpeg
 import streamlit as st
+import whisper
 
+model = whisper.load_model("base")
 # global variables
 uploaded_mp4_file = None
 uploaded_mp4_file_length = 0
@@ -63,10 +65,14 @@ if __name__ == '__main__':
     if downloadfile:
         length = len(downloadfile)
         if length > 0:
-            st.subheader('After conversion to WAV you can download it below')
-            button = st.download_button(label="Download .wav file",
-                            data=downloadfile,
-                            file_name=f'{filename}.wav',
-                            mime='audio/wav')
-            st.text(f'Size of "{filename}.wav" file to download: {length} bytes')
+            transcription = model.transcribe(downloadfile.name)
+            st.sidebar.success("Transcription Complete")
+            st.markdown(transcription["text"])
+            # st.subheader('After conversion to WAV you can download it below')
+            # button = st.download_button(label="Download .wav file",
+            #                 data=downloadfile,
+            #                 file_name=f'{filename}.wav',
+            #                 mime='audio/wav')
+        else:
+            st.text(f'Something error please reset')
     st.markdown("""---""")
