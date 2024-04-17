@@ -11,21 +11,21 @@ model = whisper.load_model("base")
 @st.experimental_memo
 def convert_mp4_to_wav_ffmpeg_bytes2bytes(input_data: bytes) -> bytes:
    """
-    It converts mp3 to wav using ffmpeg
-    :param input_data: bytes object of a mp3 file
-    :return: A bytes object of a wav file.
-    """
-    # print('convert_mp3_to_wav_ffmpeg_bytes2bytes')
-    args = (ffmpeg
-            .input('pipe:', format='mp4')
-            .output('pipe:', format='wav')
-            .global_args('-loglevel', 'error')
-            .get_args()
-            )
-    # print(args)
-    proc = subprocess.Popen(
-        ['ffmpeg'] + args, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-    return proc.communicate(input=input_data)[0]
+   It converts mp3 to wav using ffmpeg
+   :param input_data: bytes object of a mp3 file
+   :return: A bytes object of a wav file.
+   """
+   # print('convert_mp3_to_wav_ffmpeg_bytes2bytes')
+   args = (ffmpeg
+      .input('pipe:', format='mp4')
+      .output('pipe:', format='wav')
+      .global_args('-loglevel', 'error')
+      .get_args()
+      )
+   # print(args)
+   proc = subprocess.Popen(
+      ['ffmpeg'] + args, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+   return proc.communicate(input=input_data)[0]
 
 def on_file_change(uploaded_file):
     """
